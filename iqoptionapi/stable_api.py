@@ -78,77 +78,76 @@ class IQ_Option:
         self.SESSION_COOKIE = cookie
 
     def connect(self, sms_code=None):
+        self.api = IQOptionAPI(
+            "iqoption.com", self.email, self.password)
+        check = None
+
+        # 2FA--
+        if sms_code is not None:
+            self.api.setTokenSMS(self.resp_sms)
+            status, reason = self.api.connect2fa(sms_code)
+            if not status:
+                return status, reason
+        # 2FA--
+
+        self.api.set_session(headers=self.SESSION_HEADER,
+                             cookies=self.SESSION_COOKIE)
+
+        check, reason = self.api.connect()
+
+        if check == True:
+            # -------------reconnect subscribe_candle
+            self.re_subscribe_stream()
+
+            # ---------for async get name: "position-changed", microserviceName
+            while global_value.balance_id == None:
+                pass
+
+            self.position_change_all(
+                "subscribeMessage", global_value.balance_id)
+
+            self.order_changed_all("subscribeMessage")
+            self.api.setOptions(1, True)
+
+            """
+            self.api.subscribe_position_changed(
+                "position-changed", "multi-option", 2)
+
+            self.api.subscribe_position_changed(
+                "trading-fx-option.position-changed", "fx-option", 3)
+
+            self.api.subscribe_position_changed(
+                "position-changed", "crypto", 4)
+
+            self.api.subscribe_position_changed(
+                "position-changed", "forex", 5)
+
+            self.api.subscribe_position_changed(
+                "digital-options.position-changed", "digital-option", 6)
+
+            self.api.subscribe_position_changed(
+                "position-changed", "cfd", 7)
+            """
+
+            # self.get_balance_id()
+            return True, None
+        else:
+            if json.loads(reason)['code'] == 'verify':
+                response = self.api.send_sms_code(json.loads(reason)['token'])
+
+                if response.json()['code'] != 'success':
+                    return False, response.json()['message']
+
+                # token_sms
+                self.resp_sms = response
+                return False, "2FA"
         try:
             self.api.close()
-        except:
-            pass
+        except Exception as inst:
+            print('**warning** self.api.close() fail')
+            print(inst)
             # logging.error('**warning** self.api.close() fail')
-
-        if self.email is not None or self.password is not None:
-            self.api = IQOptionAPI(
-                "iqoption.com", self.email, self.password)
-            check = None
-
-            # 2FA--
-            if sms_code is not None:
-                self.api.setTokenSMS(self.resp_sms)
-                status, reason = self.api.connect2fa(sms_code)
-                if not status:
-                    return status, reason
-            # 2FA--
-
-            self.api.set_session(headers=self.SESSION_HEADER,
-                                cookies=self.SESSION_COOKIE)
-
-            check, reason = self.api.connect()
-
-            if check == True:
-                # -------------reconnect subscribe_candle
-                self.re_subscribe_stream()
-
-                # ---------for async get name: "position-changed", microserviceName
-                while global_value.balance_id == None:
-                    pass
-
-                self.position_change_all(
-                    "subscribeMessage", global_value.balance_id)
-
-                self.order_changed_all("subscribeMessage")
-                self.api.setOptions(1, True)
-
-                """
-                self.api.subscribe_position_changed(
-                    "position-changed", "multi-option", 2)
-
-                self.api.subscribe_position_changed(
-                    "trading-fx-option.position-changed", "fx-option", 3)
-
-                self.api.subscribe_position_changed(
-                    "position-changed", "crypto", 4)
-
-                self.api.subscribe_position_changed(
-                    "position-changed", "forex", 5)
-
-                self.api.subscribe_position_changed(
-                    "digital-options.position-changed", "digital-option", 6)
-
-                self.api.subscribe_position_changed(
-                    "position-changed", "cfd", 7)
-                """
-
-                # self.get_balance_id()
-                return True, None
-            else:
-                if json.loads(reason)['code'] == 'verify':
-                    response = self.api.send_sms_code(json.loads(reason)['token'])
-
-                    if response.json()['code'] != 'success':
-                        return False, response.json()['message']
-
-                    # token_sms
-                    self.resp_sms = response
-                    return False, "2FA"
-                return False, reason
+        return False, reason
 
     # self.update_ACTIVES_OPCODE()
 
@@ -724,7 +723,6 @@ class IQ_Option:
 
 
 ##############################################################################################
-
 
     def check_binary_order(self, order_id):
         while order_id not in self.api.order_binary:
