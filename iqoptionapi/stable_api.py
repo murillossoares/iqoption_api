@@ -23,13 +23,11 @@ def nested_dict(n, type):
 
 
 class IQ_Option:
-    __version__ = "7.0.0"
+    __version__ = "7.0.1"
 
-    def __init__(self, email=None, password=None, active_account_type="PRACTICE"):
+    def __init__(self, active_account_type="PRACTICE"):
         self.size = [1, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800,
                      3600, 7200, 14400, 28800, 43200, 86400, 604800, 2592000]
-        self.email = email
-        self.password = password
         self.suspend = 0.5
         self.thread = None
         self.subscribe_candle = []
@@ -77,23 +75,15 @@ class IQ_Option:
         self.SESSION_HEADER = header
         self.SESSION_COOKIE = cookie
 
-    def connect(self, sms_code=None):
+    def connect(self, ssid=None):
         self.api = IQOptionAPI(
-            "iqoption.com", self.email, self.password)
+            "iqoption.com")
         check = None
-
-        # 2FA--
-        if sms_code is not None:
-            self.api.setTokenSMS(self.resp_sms)
-            status, reason = self.api.connect2fa(sms_code)
-            if not status:
-                return status, reason
-        # 2FA--
 
         self.api.set_session(headers=self.SESSION_HEADER,
                              cookies=self.SESSION_COOKIE)
 
-        check, reason = self.api.connect()
+        check, reason = self.api.connect(ssid)
 
         if check == True:
             # -------------reconnect subscribe_candle
@@ -131,16 +121,6 @@ class IQ_Option:
 
             # self.get_balance_id()
             return True, None
-        else:
-            if json.loads(reason)['code'] == 'verify':
-                response = self.api.send_sms_code(json.loads(reason)['token'])
-
-                if response.json()['code'] != 'success':
-                    return False, response.json()['message']
-
-                # token_sms
-                self.resp_sms = response
-                return False, "2FA"
         try:
             self.api.close()
         except Exception as inst:
@@ -150,9 +130,6 @@ class IQ_Option:
         return False, reason
 
     # self.update_ACTIVES_OPCODE()
-
-    def connect_2fa(self, sms_code):
-        return self.connect(sms_code=sms_code)
 
     def check_connect(self):
         # True/False

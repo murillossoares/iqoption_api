@@ -154,7 +154,7 @@ class IQOptionAPI(object):  # pylint: disable=too-many-instance-attributes
     # ------------------
     digital_payout = None
 
-    def __init__(self, host, username, password, proxies=None):
+    def __init__(self, host, username=None, password=None, proxies=None):
         """
         :param str host: The hostname or ip address of a IQ Option server.
         :param str username: The username of a IQ Option server.
@@ -234,8 +234,8 @@ class IQOptionAPI(object):  # pylint: disable=too-many-instance-attributes
         """
         logger = logging.getLogger(__name__)
 
-        logger.debug(method + ": " + url + " headers: " + str(self.session.headers) +
-                     " cookies:  " + str(self.session.cookies.get_dict()))
+        logger.debug(method + ": " + url + " headers: " + str(self.session.headers)
+                     + " cookies:  " + str(self.session.cookies.get_dict()))
 
         response = self.session.request(method=method,
                                         url=url,
@@ -830,7 +830,9 @@ class IQOptionAPI(object):  # pylint: disable=too-many-instance-attributes
         else:
             return True
 
-    def connect(self):
+    def connect(self, ssid):
+        if ssid != None:
+            global_value.SSID = ssid
 
         global_value.ssl_Mutual_exclusion = False
         global_value.ssl_Mutual_exclusion_write = False
