@@ -4,9 +4,6 @@ from iqoptionapi.stable_api import IQ_Option
 import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-email = "murillossoares@gmail.com"
-password = "#5urv1v4L"
-
 
 class TestBinaryOption(unittest.TestCase):
 
