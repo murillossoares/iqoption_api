@@ -4,8 +4,8 @@ from iqoptionapi.stable_api import IQ_Option
 import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-email = os.getenv("email")
-password = os.getenv("password")
+email = "murillossoares@gmail.com"
+password = "#5urv1v4L"
 
 
 class TestBinaryOption(unittest.TestCase):
@@ -13,9 +13,9 @@ class TestBinaryOption(unittest.TestCase):
     def test_binary_option(self):
         # login
         I_want_money = IQ_Option()
-        I_want_money.connect(ssid="")
+        I_want_money.connect(ssid="57e7365f7644816cc8bd44016845aee5")
         I_want_money.change_balance("PRACTICE")
-        I_want_money.reset_practice_balance()
+        """I_want_money.reset_practice_balance()
         self.assertEqual(I_want_money.check_connect(), True)
         # start test binary option
         ALL_Asset = I_want_money.get_all_open_time()
@@ -46,7 +46,7 @@ class TestBinaryOption(unittest.TestCase):
 
         isSuccessful, dict = I_want_money.get_betinfo(id_put)
         self.assertTrue(isSuccessful)
-        I_want_money.get_optioninfo(10)
+        I_want_money.get_optioninfo(10)"""
 
 
 if __name__ == '__main__':
