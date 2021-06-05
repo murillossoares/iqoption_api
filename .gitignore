@@ -7,3 +7,5 @@ dist/
 venv/
 .idea
 test.py
+.env
+__pycache__/

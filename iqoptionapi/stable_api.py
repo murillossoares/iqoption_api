@@ -125,7 +125,6 @@ class IQ_Option:
             self.api.close()
         except Exception as inst:
             print('**warning** self.api.close() fail')
-            print(inst)
             # logging.error('**warning** self.api.close() fail')
         return False, reason
 
